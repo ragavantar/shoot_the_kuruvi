@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="gifler.min.js"></script>
+    <style>
+      canvas {
+        border: 1px solid #d3d3d3;
+        background-color: #f1f1f1;
+      }
+    </style>
+  </head>
+  <body onload="startGame()">
+    <script>
+      var myGamePiece;
+      var myBullets = [];
+      var myBird;
+      var bgImg = new Image();
+      bgImg.src =
+        "https://media.gettyimages.com/vectors/treeline-header-vector-id538490552?k=6&m=538490552&s=612x612&w=0&h=uRLtiNKneY8trvlvgwc5qaC2MBfN9Nr6jU5yicKRqoo=";
+      // "https://icon2.kisspng.com/20180206/cdq/kisspng-study-of-a-tree-watercolor-painting-pine-forest-5a7a0ff6bb2397.2575019515179489187665.jpg";
+      // "https://static.boredpanda.com/blog/wp-content/uploads/2015/02/surreal-forest-photograhy-ellie-davis-13__880.jpg";
+      // "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTUPaf7gnCXlLI0V9GHKbfel9H7ICVOMkWjF3ZZH-NpP1yf-i6l";
+
+      function genBird(pX, pY) {
+        this.width = 100;
+        this.height = 50;
+        this.x = pX;
+        this.y = pY;
+        this.makeFly = (ctx, frame) => {
+          ctx.globalCompositeOperation = "source-over";
+          this.x += 10;
+          // console.log(this.x);
+          if (this.x < 400) {
+            ctx.drawImage(frame.buffer, frame.x + this.x, frame.y, 100, 100);
+          }
+        };
+        this.init = function() {
+          gifler(
+            // "https://thumbs.gfycat.com/FlippantRewardingHusky-size_restricted.gif"
+            "https://cdn140.picsart.com/261000308019202.gif?c256x256"
+          ).frames("canvas", this.makeFly);
+        };
+      }
+
+      function startGame() {
+        // myGamePiece = new component(30, 30, "red", 10, 20);
+        myGamePiece = new component(
+          30,
+          30,
+          "https://media.gettyimages.com/vectors/treeline-header-vector-id538490552?k=6&m=538490552&s=612x612&w=0&h=uRLtiNKneY8trvlvgwc5qaC2MBfN9Nr6jU5yicKRqoo=",
+          100,
+          120,
+          "image"
+        );
+        // myBullet = new component(10, 30, "red", 200, 200);
+        myGameArea.init();
+        myGameArea.splash();
+        myBird = new genBird(10, 10);
+        myBird.init();
+        document.onkeydown = function(e) {
+          var keyCode = e.keyCode;
+          if (keyCode == 32) {
+            myGameArea.start();
+          } else {
+            genBullet();
+          }
+        };
+      }
+
+      var myGameArea = {
+        canvas: document.createElement("canvas"),
+        init: function() {
+          this.canvas.width = 480;
+          this.canvas.height = 270;
+          this.canvas.style.background = "white";
+          this.context = this.canvas.getContext("2d");
+          document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        },
+        splash: function() {
+          let ctx = this.context;
+          ctx.font = "30px Comic Sans MS";
+          ctx.fillStyle = "brown";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            "Shoot the Kuruvi",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
+
+          let img = new Image();
+          img.src =
+            "https://b.kisscc0.com/20180818/llw/kisscc0-bow-and-arrow-silhouette-line-art-black-and-white-bow-and-arrow-2-5b7799d62ac9a6.8741777115345648221753.png";
+          img.onload = () => {
+            this.context.drawImage(
+              img,
+              this.canvas.width / 2,
+              this.canvas.height - 125,
+              100,
+              100
+            );
+          };
+        },
+        bgX: 0,
+        drawBg: function() {
+          this.context.drawImage(
+            bgImg,
+            // this.bgx,
+            100,
+            this.canvas.height - 125,
+            500,
+            200
+          );
+          console.log(this.bgX);
+        },
+        start: function() {
+          this.interval = setInterval(updateGameArea, 20);
+          this.animateBg = setInterval(animateBg, 100);
+        },
+        clear: function() {
+          this.context.clearRect(
+            0,
+            100,
+            this.canvas.width,
+            this.canvas.height - 100
+          );
+        },
+        clearArea: function(x, y, w, h) {
+          this.context.clearRect(x, y, w, h);
+        },
+        clearAll: function() {
+          this.context.clearRect(0, 100, this.canvas.width, this.canvas.height);
+        },
+        stop: function() {
+          clearInterval(this.interval);
+        },
+        gameOver: function() {
+          let ctx = this.context;
+          ctx.font = "30px Comic Sans MS";
+          ctx.fillStyle = "red";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            "Game Over",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
+          ctx.fillText(
+            "Now u r a Vettaiyan",
+            this.canvas.width / 2,
+            this.canvas.height / 2 + 30
+          );
+        }
+      };
+
+      function component(width, height, color, x, y, type) {
+        this.type = type;
+        if (type == "image") {
+          this.image = new Image();
+          this.image.src = color;
+        }
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+
+        this.update = function() {
+          ctx = myGameArea.context;
+          if (type == "image") {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+          } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+          }
+        };
+        this.newPos = function() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+        };
+
+        this.crashWith = function(otherobj) {
+          var myleft = this.x;
+          var myright = this.x + this.width;
+          var mytop = this.y;
+          var mybottom = this.y + this.height;
+          var otherleft = otherobj.x;
+          var otherright = otherobj.x + otherobj.width;
+          var othertop = otherobj.y;
+          var otherbottom = otherobj.y + otherobj.height;
+          // console.log(otherobj);
+          var crash = true;
+          if (
+            mybottom < othertop ||
+            mytop > otherbottom ||
+            myright < otherleft ||
+            myleft > otherright
+          ) {
+            crash = false;
+          }
+          return crash;
+        };
+      }
+
+      function updateGameArea() {
+        myGameArea.clear();
+        // myGamePiece.x += 1;
+        // myGamePiece.update();
+
+        for (i = 0; i < myBullets.length; i++) {
+          myBullet = myBullets[i];
+          if (myBullet.crashWith(myBird)) {
+            myGameArea.stop();
+            myGameArea.clearAll();
+            myGameArea.gameOver();
+            return;
+          }
+          if (myBullet.y > 100) {
+            myBullet.y -= 2;
+            myBullet.update();
+          } else {
+            // console.log(myBullet);
+            myGameArea.clearArea(
+              myBullet.x,
+              myBullet.y,
+              myBullet.width,
+              myBullet.height
+            );
+            // myBullet.update();
+          }
+        }
+      }
+
+      function genBullet() {
+        myBullet = new component(5, 10, "black", 200, 300);
+        myBullets.push(myBullet);
+      }
+    </script>
+  </body>
+</html>
