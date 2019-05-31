@@ -36,13 +36,13 @@
         );
 
         myGamePieceS = new component(
-          150,
-          150,
+          64,
+          45,
           // "http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/images/coin-sprite-animation-sprite-sheet.png",
           // "https://cdn-images-1.medium.com/max/1600/1*WhDjw8GiV5o0flBXM4LXEw.png",
-          "https://lokesh471.files.wordpress.com/2014/04/twitter-bird-sprite.png?w=960",
+          "img/bird.png",
           100,
-          0,
+          20,
           "sprite"
         );
         myGameArea.start();
@@ -83,6 +83,26 @@
         },
         stop: function() {
           clearInterval(this.interval);
+
+          let ctx = this.context;
+          ctx.font = "30px Comic Sans MS";
+          ctx.fillStyle = "black";
+          ctx.textAlign = "center";
+          ctx.strokeText(
+            "Save the Kurui",
+            this.canvas.width / 2,
+            this.canvas.height / 2 - 60
+          );
+          ctx.strokeText(
+            "Game Over",
+            this.canvas.width / 2,
+            this.canvas.height / 2 - 30
+          );
+          ctx.strokeText(
+            "Kuruvi died",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
         }
       };
 
@@ -125,9 +145,8 @@
               this.height,
               this.x,
               this.y,
-              50, // this.width,
-              50
-              // this.height
+              this.width,
+              this.height
             );
           } else {
             ctx.fillStyle = color;
@@ -214,15 +233,16 @@
       }
 
       function genBullet() {
-        // myBullet = new component(
-        //   70,
-        //   50,
-        //   "https://cdn0.iconfinder.com/data/icons/hipster-arrows/100/Arrow_up-512.png",
-        //   200,
-        //   300,
-        //   "image"
-        // );
-        myBullet = new component(5, 10, "red", 200, 300, "");
+        myBullet = new component(
+          70,
+          50,
+          "https://cdn0.iconfinder.com/data/icons/hipster-arrows/100/Arrow_up-512.png",
+          Math.floor(Math.random() * myGameArea.canvas.width + 1),
+          // 200,
+          300,
+          "image"
+        );
+        // myBullet = new component(5, 10, "red", 200, 300, "");
         myBullets.push(myBullet);
       }
     </script>
@@ -256,10 +276,5 @@
         DOWN
       </button>
     </div>
-
-    <p>The background will go on looping forever.</p>
-    <p>
-      You should choose a background which overlaps better than in this example.
-    </p>
   </body>
 </html>
