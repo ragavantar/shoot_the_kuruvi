@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      canvas {
+        border: 1px solid #d3d3d3;
+        /* background-color: brown; */
+        /* background: url("https://imgc.artprintimages.com/img/print/megan-aroon-duncanson-dreaming-in-gold_u-l-q1at8390.jpg?src=gp"); */
+      }
+    </style>
+  </head>
+  <body onload="startGame()">
+    <script>
+      var myGamePiece;
+      var myMangos = [];
+      var myStone;
+      var sX, sY, eX, xY, mX, mY;
+      var clicks = 0;
+
+      function startGame() {
+        myGamePiece = new component(
+          960,
+          540,
+          "https://imgc.artprintimages.com/img/print/megan-aroon-duncanson-dreaming-in-gold_u-l-q1at8390.jpg?src=gp",
+          0,
+          0,
+          "image"
+        );
+        myGameArea.start();
+
+        for (i = 0; i < 5; genMango(), i++);
+        // genMango();
+
+        // sX = 100;
+        // sY = 900;
+        // eX = 500;
+        // eY = 0;
+
+        document.getElementsByTagName("canvas")[0].onclick = e => {
+          clicks++;
+          if (clicks % 2 == 0) {
+            eX = e.layerX;
+            eY = e.layerY;
+            time = 3000 / 20; //3sec/20s interval
+            dx = Math.abs(sX - eX);
+            dy = Math.abs(sY - eY);
+            mX = dx / time;
+            mY = dy / time;
+            myStone = new component(
+              20,
+              20,
+              "https://www.sccpre.cat/mypng/full/45-455677_cartoon-stone-png-clipart-stone.png",
+              sX,
+              sY,
+              "image"
+            );
+          } else {
+            sX = e.layerX;
+            sY = e.layerY;
+          }
+        };
+      }
+
+      var myGameArea = {
+        canvas: document.createElement("canvas"),
+        start: function() {
+          this.canvas.width = 960;
+          this.canvas.height = 540;
+          this.context = this.canvas.getContext("2d");
+          document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+          this.interval = setInterval(updateGameArea, 20);
+        },
+        clear: function() {
+          this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        },
+        stop: function() {
+          clearInterval(this.interval);
+
+          let ctx = this.context;
+          ctx.font = "60px Comic Sans MS";
+          ctx.fillStyle = "Yellow";
+          ctx.textAlign = "center";
+          ctx.fillText(
+            "Thiruttu Mango",
+            this.canvas.width / 2,
+            this.canvas.height / 2 - 60
+          );
+          ctx.fillText(
+            "Game Over",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
+          ctx.fillText(
+            "tasty mambalam",
+            this.canvas.width / 2,
+            this.canvas.height / 2 + 60
+          );
+          ctx.fillStyle = "Orange";
+          ctx.font = "62px Comic Sans MS";
+          ctx.strokeText(
+            "Thiruttu Mango",
+            this.canvas.width / 2,
+            this.canvas.height / 2 - 60
+          );
+          ctx.strokeText(
+            "Game Over",
+            this.canvas.width / 2,
+            this.canvas.height / 2
+          );
+          ctx.strokeText(
+            "tasty mambalam",
+            this.canvas.width / 2,
+            this.canvas.height / 2 + 60
+          );
+        }
+      };
+
+      function component(width, height, color, x, y, type) {
+        this.type = type;
+        if (type == "image" || type == "background" || type == "sprite") {
+          this.image = new Image();
+          this.image.src = color;
+        }
+        this.width = width;
+        this.height = height;
+        this.x = x;
+        this.y = y;
+        this.update = function() {
+          ctx = myGameArea.context;
+          if (type == "image" || type == "background") {
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            if (type == "background") {
+              ctx.drawImage(
+                this.image,
+                this.x + this.width,
+                this.y,
+                this.width,
+                this.height
+              );
+            }
+          } else if (type == "sprite") {
+            // context.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh)
+
+            let sx = this.width * (myGameArea.frameNo % 4);
+            // let sx = this.x * this.width;
+            // console.log(sx);
+            ctx.drawImage(
+              this.image,
+              sx,
+              0,
+              this.width,
+              this.height,
+              this.x,
+              this.y,
+              this.width,
+              this.height
+            );
+          } else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+          }
+        };
+        this.crashWith = function(otherobj) {
+          var myleft = this.x;
+          var myright = this.x + this.width;
+          var mytop = this.y;
+          var mybottom = this.y + this.height;
+          var otherleft = otherobj.x;
+          var otherright = otherobj.x + otherobj.width;
+          var othertop = otherobj.y;
+          var otherbottom = otherobj.y + otherobj.height;
+          // console.log(otherobj);
+          var crash = true;
+          if (
+            mybottom < othertop ||
+            mytop > otherbottom ||
+            myright < otherleft ||
+            myleft > otherright
+          ) {
+            crash = false;
+          }
+          return crash;
+        };
+      }
+
+      function updateGameArea() {
+        myGameArea.clear();
+        // myGamePiece.x += 1;
+        myGamePiece.update();
+
+        for (i = 0; i < myMangos.length; i++) {
+          myMango = myMangos[i];
+          if (myStone && myMango.crashWith(myStone)) {
+            console.log("got it.. taste it");
+            myGameArea.stop();
+          }
+          myMango.update();
+        }
+        if (clicks % 2 == 0) {
+          myStone.x += mX;
+          myStone.y -= mY;
+          myStone.update();
+        }
+      }
+
+      function genMango() {
+        myMango = new component(
+          50,
+          50,
+          "https://i.pinimg.com/originals/42/d8/fd/42d8fdba7e956155825ad4eefdd426ec.png",
+          Math.floor(Math.random() * myGameArea.canvas.width + 1),
+          Math.floor(Math.random() * 200 + 1),
+          "image"
+        );
+        myMangos.push(myMango);
+      }
+    </script>
+  </body>
+</html>
